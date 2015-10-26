@@ -16,7 +16,7 @@ This script will print out the grouped datasets to stout and also create a html 
 $ python analyze.py data.json -c 10
 ```
 
-After getting the results, you can visualize 
+After getting the results, you can visualize it on the browser by running a webserver and visiting localhost:8000 on a browser 
 
 
 ```bash
