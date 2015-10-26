@@ -1,7 +1,6 @@
 # Data.json Classification 
 
-Script to cluster and categorize datasets from our catalogs using 
-data.json
+Script to cluster and categorize datasets from open data catalogs using data.json
 
 
 ## Install 
