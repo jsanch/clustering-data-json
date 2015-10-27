@@ -23,5 +23,5 @@ After getting the results, you can visualize it on the browser by running a webs
 $ python -m "SimpleHTTPServer"
 ```
 ## Credit
-Credits to this post http://brandonrose.org/clustering
+This script is highly based on this post: http://brandonrose.org/clustering
 
