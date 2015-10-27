@@ -22,4 +22,6 @@ After getting the results, you can visualize it on the browser by running a webs
 ```bash
 $ python -m "SimpleHTTPServer"
 ```
+## Credit
+Credits to this post http://brandonrose.org/clustering
 
