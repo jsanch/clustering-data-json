@@ -104,7 +104,7 @@ def json_to_lists(data_json_file):
     with open(data_json_file, 'r') as data_file:
         data = json.load(data_file)
 
-    datasets = data['dataset']
+    datasets = data
 
     titles = []
     descriptions =[]
