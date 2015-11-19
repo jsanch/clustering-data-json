@@ -66,6 +66,8 @@ def main():
                     help = "viz name")
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Verbose logging of debug msgs')
+    parser.add_argument('--keywords', action='store_true',
+                        help='print keywords')
     parser.add_argument('--url', type=str,
                        help='data.json endpoint') #to be implemented.
 
@@ -126,11 +128,14 @@ def run(data_resource_path,num_clusters,num_fits, using_url=False, args=''):
     order_centroids = kresults['order_centroids']
     k_clusters_dataframe = kresults['k_clusters_dataframe']
     k_clusters = kresults['k_clusters']
+    k_keywords = kresults['keywords']
 
     # print_kframe(k_clusters_dataframe)
     if args != '':
         if args.viz:
             make_a_d3_plot(dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters,args.viz_name)
+    if args.keywords:
+        print(k_keywords)
 
     return k_clusters_dataframe
 
@@ -276,7 +281,7 @@ def k_means_cluster(tfidf_matrix,dataLists,vocab_frame, terms,dist, num_clusters
     frame['keywords'] = frame['cluster'].map(cluster_keyword_dictionary)
 
 
-    return { 'order_centroids': order_centroids, 'k_clusters_dataframe': frame, 'k_clusters': clusters}
+    return { 'order_centroids': order_centroids, 'k_clusters_dataframe': frame, 'k_clusters': clusters, 'keywords': cluster_keyword_dictionary}
 ###############################################################################
 # Viz
 ###############################################################################
