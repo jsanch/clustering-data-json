@@ -1,0 +1,5 @@
+python kcluster.py ../data-json-files/data.kcmo.org.data.json -k 35 --csv --csv-name "kcmo35.csv" --viz --viz-name "kcmo35.html"
+python kcluster.py ../data-json-files/data.edmonton.ca.data.json -k 13 --csv --csv-name "edmonton13.csv" --viz --viz-name "edmonton13.html"
+python kcluster.py ../data-json-files/data.lacounty.gov.data.json  -k 13 --csv --csv-name "lacounty13.csv" --viz --viz-name "lacounty13.html"
+python kcluster.py ../data-json-files/data.maryland.gov.data.json  -k 25 --csv --csv-name "maryland25.csv" --viz --viz-name "maryland25.html"
+python kcluster.py ../data-json-files/data.kingcounty.gov.data.json  -k 19 --csv --csv-name "kingcounty19.csv" --viz --viz-name "kingcounty19.html"

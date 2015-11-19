@@ -1,0 +1,5 @@
+{
+  "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+  "dataset": [
+{"accessLevel":"public","landingPage":"https://www.metrochicagodata.org/d/kt59-57by","issued":"2012-03-22","modified":"2013-01-29","contactPoint":{"fn":"<Nobody>","hasEmail":"mailto:"},"identifier":"https://www.metrochicagodata.org/api/views/kt59-57by","publisher":{"name":"www.metrochicagodata.org"},"description":"Metro Chicago Health Facilities","title":"Metro Chicago Health Facilities","distribution":[{"downloadURL":"https://www.metrochicagodata.org/api/views/kt59-57by/rows.csv?accessType=DOWNLOAD","mediaType":"text/csv"},{"downloadURL":"https://www.metrochicagodata.org/api/views/kt59-57by/rows.rdf?accessType=DOWNLOAD","mediaType":"application/rdf+xml"},{"downloadURL":"https://www.metrochicagodata.org/api/views/kt59-57by/rows.json?accessType=DOWNLOAD","mediaType":"application/json"},{"downloadURL":"https://www.metrochicagodata.org/api/views/kt59-57by/rows.xml?accessType=DOWNLOAD","mediaType":"application/xml"}]}  ]
+}

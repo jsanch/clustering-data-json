@@ -1,0 +1,5 @@
+{
+  "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+  "dataset": [
+{"accessLevel":"public","landingPage":"https://eda.data.commerce.gov/d/x9eq-ikpe","issued":"2015-03-11","modified":"2015-03-11","contactPoint":{"fn":"<Nobody>","hasEmail":"mailto:webmaster@eda.gov"},"identifier":"https://eda.data.commerce.gov/api/views/x9eq-ikpe","publisher":{"name":"eda.data.commerce.gov"},"description":"Prime Award Spending Data from USASpending.gov","title":"Prime Award Spending Data","distribution":[{"downloadURL":"http://usaspending.gov/search?form_fields=%7B%22search_term%22%3A%22ECONOMIC+DEVELOPMENT+ADMINISTRATION%22%7D","mediaType":"unknown"}],"theme":["Government"]}  ]
+}

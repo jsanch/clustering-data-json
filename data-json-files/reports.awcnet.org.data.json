@@ -1,0 +1,5 @@
+{
+  "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+  "dataset": [
+{"accessLevel":"public","landingPage":"https://reports.awcnet.org/d/3zhy-kswv","issued":"2015-05-27","modified":"2015-05-27","contactPoint":{"fn":"<Nobody>","hasEmail":"mailto:"},"identifier":"https://reports.awcnet.org/api/views/3zhy-kswv","publisher":{"name":"reports.awcnet.org"},"description":"List of Depts. URL field will be populated when it depts are complete","title":"AWC Report Catalog List","distribution":[{"downloadURL":"https://reports.awcnet.org/api/views/3zhy-kswv/rows.csv?accessType=DOWNLOAD","mediaType":"text/csv"},{"downloadURL":"https://reports.awcnet.org/api/views/3zhy-kswv/rows.rdf?accessType=DOWNLOAD","mediaType":"application/rdf+xml"},{"downloadURL":"https://reports.awcnet.org/api/views/3zhy-kswv/rows.json?accessType=DOWNLOAD","mediaType":"application/json"},{"downloadURL":"https://reports.awcnet.org/api/views/3zhy-kswv/rows.xml?accessType=DOWNLOAD","mediaType":"application/xml"}]}  ]
+}
