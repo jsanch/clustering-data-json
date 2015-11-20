@@ -1,7 +1,67 @@
-<!doctype html>
-<title>Hello from Flask</title>
-{% if name %}
-  <h1>Hello {{ name }}!</h1>
-{% else %}
-  <h1>Hello World!</h1>
-{% endif %}
+<html>
+  <head>
+   <!-- Viz libs -->
+    <script charset='utf-8' src='http://d3js.org/d3.v3.min.js'></script>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <!-- UNDERSCORE IS AWESOME -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js'></script>
+    <meta charset='utf-8'>
+    <!-- Cool font -->
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <!-- Booststrap -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+
+    <!-- My Stile -->
+    <link href='static/css/style.css' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div id='intro-container', class="container">
+        <h1>
+            Data Portal Visualizer.
+        </h1>
+        <h5>
+           Too many datasets ? Use this to visualize your Data Portal and understand your portal a little better.
+
+        </h5>
+        <br>
+        <div class="search">
+            <form class="form-horizontal">
+              <div class="form-group">
+                <label for="data_json_url" class="col-sm-2 control-label">data.json endpoint</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="data_json_url" placeholder="Enter data.json url i.e https://data.commerce.gov/data.json">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="k" class="col-sm-2 control-label">Categories</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="k" placeholder="k">
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                  <button id='vizbtn' type="button" class="btn btn-default">Visualize!</button>
+                </div>
+              </div>
+            </form>
+        </div>
+
+   </div>
+    <div id='viz-container'>
+        <div id='myDiv'></div>
+     </div>
+     <div id='cluster-info'>
+
+     </div>
+     <div id='tables-conatiner'>
+        <div id='tables' class="centered container" ></div>
+     </div>
+
+  </body>
+  <!-- Must include after document loads. -->
+  <script src='static/js/viz.js'></script>
+</html>

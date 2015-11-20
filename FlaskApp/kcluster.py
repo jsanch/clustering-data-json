@@ -40,23 +40,34 @@ import urllib2
 
 
 def web_server_call(url,k=10,f=1):
-
+    print("Starting to Cluster ")
     frame = run(url,k,f,True)
-    create_html_cluster_tables(frame)
-    print(frame)
+    frame.to_csv('static/cluster_data.csv',encoding='utf-8',index=False)
+    # create_html_cluster_tables(frame)
+    # print(frame)
     res = frame.to_json(orient='records')
+    wrapper = []
+    wrapper.append(res)
+    wrapper.append({"testing":1})
+    strv = json.dumps(wrapper)
 
-    return res
+    return strv
 
 
 def create_html_cluster_tables(df):
-    groups = df.groupby('cluster')
-    for name, group in groups:
-        tabletitle = group['keywords'].iloc[0]
-        g = group[['title']].rename(columns={'title':tabletitle})
-        filename = 'htmltables/'+ str(name) + '.html'
-        g.to_html(filename, index=False, col_space=300)
 
+    df.to_csv('temp.csv',encoding='utf-8',index=False)
+    df = pd.read_csv('temp.csv')
+    # print(df)
+    try:
+        groups = df.groupby('cluster')
+        for name, group in groups:
+            tabletitle = group['keywords'].iloc[0]
+            g = group[['title']].rename(columns={'title':tabletitle})
+            filename = 'htmltables/'+ str(name) + '.html'
+            g.to_html(filename, index=False, col_space=300)
+    except:
+        print("fuck unicode ")
 
 
 def main():
@@ -212,7 +223,7 @@ def tokenize_and_stem(text):
     # first tokenize by sentence, then by word to ensure that punctuation is caught as it's own token
     tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]
     filtered_tokens = []
-    # filter out any tokens not containing letters (e.g., numeric tokens, raw punctuation)
+
     for token in tokens:
         if re.search('[a-zA-Z]', token):
             filtered_tokens.append(token)
@@ -232,10 +243,20 @@ def tokenize_only(text):
 
 
 def tokenize_corpus(dataLists):
+    #filter stupid words
+    merged = []
+    for i in range(0, len(dataLists['descriptions'])):
+        merged.append( dataLists['descriptions'][i] + ' ' +dataLists['titles'][i])
+    for line in merged:
+        line.replace('data', '')
+        line.replace('api', '')
+        line.replace('dataset', '')
+        line.replace('\'s', '')
+
     totalvocab_stemmed = []
     totalvocab_tokenized = []
-    for i in dataLists['descriptions']:
-        allwords_stemmed = tokenize_and_stem(i) #for each item in 'synopses', tokenize/stem
+    for i in merged:
+        allwords_stemmed = tokenize_and_stem(i) #for each item in 'descriptions', tokenize/stem
         totalvocab_stemmed.extend(allwords_stemmed) #extend the 'totalvocab_stemmed' list
 
         allwords_tokenized = tokenize_only(i)
@@ -323,7 +344,6 @@ def add_viz_coords_to_frame(k_clusters_dataframe, dist,vocab_frame,order_centroi
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
     xs, ys = pos[:, 0], pos[:, 1]
-    print(len(xs))
     color_list = generate_colors(num_clusters)
     cluster_colors = {}
     for i in range(0,num_clusters):
@@ -351,7 +371,6 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
     xs, ys = pos[:, 0], pos[:, 1]
-    print(len(xs))
     color_list = generate_colors(num_clusters)
     cluster_colors = {}
     for i in range(0,num_clusters):
