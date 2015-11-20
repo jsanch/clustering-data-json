@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # General
 from __future__ import print_function
 from argparse import ArgumentParser
@@ -39,13 +38,36 @@ import os
 import shutil
 import urllib2
 
+
 def web_server_call(url,k=10,f=1):
-
+    print("Starting to Cluster ")
     frame = run(url,k,f,True)
+    frame.to_csv('static/cluster_data.csv',encoding='utf-8',index=False)
+    # create_html_cluster_tables(frame)
+    # print(frame)
     res = frame.to_json(orient='records')
-    return res
+    wrapper = []
+    wrapper.append(res)
+    wrapper.append({"testing":1})
+    strv = json.dumps(wrapper)
+
+    return strv
 
 
+def create_html_cluster_tables(df):
+
+    df.to_csv('temp.csv',encoding='utf-8',index=False)
+    df = pd.read_csv('temp.csv')
+    # print(df)
+    try:
+        groups = df.groupby('cluster')
+        for name, group in groups:
+            tabletitle = group['keywords'].iloc[0]
+            g = group[['title']].rename(columns={'title':tabletitle})
+            filename = 'htmltables/'+ str(name) + '.html'
+            g.to_html(filename, index=False, col_space=300)
+    except:
+        print("fuck unicode ")
 
 
 def main():
@@ -58,15 +80,23 @@ def main():
                         help = "Specify number of k-mean fits")
     parser.add_argument('--csv', action='store_true',
                         help = "Use if you want output in csv")
+    parser.add_argument('--csv-name', type=str,
+                        help = "specify name of csv")
     parser.add_argument('--viz', action='store_true',
                         help = "Use if you want a viz output")
+    parser.add_argument('--viz-name', type=str,
+                    help = "viz name")
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Verbose logging of debug msgs')
+    parser.add_argument('--keywords', action='store_true',
+                        help='print keywords')
     parser.add_argument('--url', type=str,
                        help='data.json endpoint') #to be implemented.
 
 
     args = parser.parse_args()
+
+
 
     # Logging
     if args.verbose:
@@ -88,11 +118,16 @@ def main():
     else:
         num_fits = 20
 
+    frame = run(args.filename,num_clusters,num_fits,False,args)
+    # print_kframe(frame)
 
-    run(args.filename,num_clusters,num_fits)
+    if args.csv:
+        frame.to_csv(args.csv_name, index=False,  encoding='utf-8')
 
 
-def run(data_resource_path,num_clusters,num_fits, using_url=False):
+
+
+def run(data_resource_path,num_clusters,num_fits, using_url=False, args=''):
     if using_url:
         response = urllib2.urlopen(data_resource_path)
         data_json = json.load(response)
@@ -101,26 +136,39 @@ def run(data_resource_path,num_clusters,num_fits, using_url=False):
             data_json = json.load(data_file)
 
     dataLists = json_to_lists(data_json)
-
+    print("created datalists")
     vocab_frame = tokenize_corpus(dataLists)
-
+    print("Created vocab_frame")
     results = get_tfidf_matrix_and_terms(dataLists['descriptions'])
+    print("created tfidf")
     tfidf_matrix = results['tfidf_matrix']
     terms = results['terms']
 
     # Create a coside_distance matrixof distances.
     dist = 1 - cosine_similarity(tfidf_matrix)
-
+    print("created cosine similarity matrix")
 
     kresults  = k_means_cluster(tfidf_matrix,dataLists,vocab_frame,terms,dist,num_clusters,num_fits)
+    print("clustered !")
     order_centroids = kresults['order_centroids']
     k_clusters_dataframe = kresults['k_clusters_dataframe']
     k_clusters = kresults['k_clusters']
+    k_keywords = kresults['keywords']
 
     # print_kframe(k_clusters_dataframe)
+    # if args != '':
+    #     if args.viz:
+    #         make_a_d3_plot(dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters,args.viz_name)
 
-    return k_clusters_dataframe
-    # make_a_d3_plot(dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters)
+    #     if args.keywords:
+    #         print(k_keywords)
+
+    df = add_viz_coords_to_frame(k_clusters_dataframe, dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters)
+
+    return df
+
+
+
 
 
 def print_kframe(k_clusters_dataframe):
@@ -137,8 +185,11 @@ def print_kframe(k_clusters_dataframe):
 ###############################################################################
 def json_to_lists(data_json):
 
+    try:
+        datasets = data_json['dataset']
+    except:
+        datasets = data_json
 
-    datasets = data_json['dataset']
 
     titles = []
     descriptions =[]
@@ -174,7 +225,7 @@ def tokenize_and_stem(text):
     # first tokenize by sentence, then by word to ensure that punctuation is caught as it's own token
     tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]
     filtered_tokens = []
-    # filter out any tokens not containing letters (e.g., numeric tokens, raw punctuation)
+
     for token in tokens:
         if re.search('[a-zA-Z]', token):
             filtered_tokens.append(token)
@@ -194,10 +245,20 @@ def tokenize_only(text):
 
 
 def tokenize_corpus(dataLists):
+    #filter stupid words
+    merged = []
+    for i in range(0, len(dataLists['descriptions'])):
+        merged.append( dataLists['descriptions'][i] + ' ' +dataLists['titles'][i])
+    for line in merged:
+        line.replace('data', '')
+        line.replace('api', '')
+        line.replace('dataset', '')
+        line.replace('\'s', '')
+
     totalvocab_stemmed = []
     totalvocab_tokenized = []
-    for i in dataLists['descriptions']:
-        allwords_stemmed = tokenize_and_stem(i) #for each item in 'synopses', tokenize/stem
+    for i in merged:
+        allwords_stemmed = tokenize_and_stem(i) #for each item in 'descriptions', tokenize/stem
         totalvocab_stemmed.extend(allwords_stemmed) #extend the 'totalvocab_stemmed' list
 
         allwords_tokenized = tokenize_only(i)
@@ -261,7 +322,7 @@ def k_means_cluster(tfidf_matrix,dataLists,vocab_frame, terms,dist, num_clusters
     frame['keywords'] = frame['cluster'].map(cluster_keyword_dictionary)
 
 
-    return { 'order_centroids': order_centroids, 'k_clusters_dataframe': frame, 'k_clusters': clusters}
+    return { 'order_centroids': order_centroids, 'k_clusters_dataframe': frame, 'k_clusters': clusters, 'keywords': cluster_keyword_dictionary}
 ###############################################################################
 # Viz
 ###############################################################################
@@ -275,7 +336,33 @@ def generate_colors(n):
 
 
 
-def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num_clusters=10):
+def add_viz_coords_to_frame(k_clusters_dataframe, dist,vocab_frame,order_centroids,terms,_clusters,dataLists,num_clusters=10):
+    MDS()
+    # convert two components as we're plotting points in a two-dimensional plane
+    # "precomputed" because we provide a distance matrix
+    # we will also specify `random_state` so the plot is reproducible.
+    mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
+
+    pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
+
+    xs, ys = pos[:, 0], pos[:, 1]
+    color_list = generate_colors(num_clusters)
+    cluster_colors = {}
+    for i in range(0,num_clusters):
+        cluster_colors[i] = color_list[i]
+
+    keywords = k_clusters_dataframe['keywords'].to_dict()
+    nk = {}
+    for k in keywords:
+        nk[k] = keywords[k]
+
+    df = pd.DataFrame(dict(x=xs, y=ys, cluster=_clusters, title=dataLists['titles']))
+    df['keywords'] = df['cluster']
+    df['keywords'].replace(nk,inplace=True)
+    return df
+
+
+def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num_clusters=10,viz_name='index.html'):
     MDS()
 
     # convert two components as we're plotting points in a two-dimensional plane
@@ -286,7 +373,6 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
     xs, ys = pos[:, 0], pos[:, 1]
-
     color_list = generate_colors(num_clusters)
     cluster_colors = {}
     for i in range(0,num_clusters):
@@ -300,6 +386,7 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
                 cluster_names[i] = vocab_frame.ix[terms[ind].split(' ')].values.tolist()[0][0].encode('utf-8', 'ignore') +','
             else:
                 cluster_names[i] = cluster_names[i] + vocab_frame.ix[terms[ind].split(' ')].values.tolist()[0][0].encode('utf-8', 'ignore') +','
+    # print(cluster_names)
 
     ###############################################################################
     # mpldd3 plot
@@ -338,6 +425,8 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
 
     #create data frame that has the result of the MDS plus the cluster numbers and titles
     df = pd.DataFrame(dict(x=xs, y=ys, label=clusters, title=dataLists['titles']))
+
+    df.to_csv("scatterplottest.csv", encoding='utf-8', index=False)
     #group by cluster
     groups = df.groupby('label')
 
@@ -387,31 +476,30 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
     html = mpld3.fig_to_html(fig)
 
 
-    with open("index.html", "w") as text_file:
+    with open(viz_name, "w") as text_file:
         text_file.write(html)
-
     #######
-    ### plt
+    ### hierarchy
     ########
 
-    from scipy.cluster.hierarchy import ward, dendrogram
+    # from scipy.cluster.hierarchy import ward, dendrogram
 
-    linkage_matrix = ward(dist) #define the linkage_matrix using ward clustering pre-computed distances
+    # linkage_matrix = ward(dist) #define the linkage_matrix using ward clustering pre-computed distances
 
-    fig, ax = plt.subplots(figsize=(15, 60)) # set size
-    ax = dendrogram(linkage_matrix, orientation="right", labels=dataLists['titles']);
+    # fig, ax = plt.subplots(figsize=(15, 60)) # set size
+    # ax = dendrogram(linkage_matrix, orientation="right", labels=dataLists['titles']);
 
-    plt.tick_params(\
-        axis= 'x',          # changes apply to the x-axis
-        which='both',      # both major and minor ticks are affected
-        bottom='off',      # ticks along the bottom edge are off
-        top='off',         # ticks along the top edge are off
-        labelbottom='off')
+    # plt.tick_params(\
+    #     axis= 'x',          # changes apply to the x-axis
+    #     which='both',      # both major and minor ticks are affected
+    #     bottom='off',      # ticks along the bottom edge are off
+    #     top='off',         # ticks along the top edge are off
+    #     labelbottom='off')
 
-    # plt.tight_layout() #show plot with tight layout
+    # # plt.tight_layout() #show plot with tight layout
 
-    #uncomment below to save figure
-    plt.savefig('ward_clusters.png', dpi=200)
+    # #uncomment below to save figure
+    # plt.savefig('ward_clusters.png', dpi=200)
 
 
 

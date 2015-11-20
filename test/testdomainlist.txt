@@ -1,0 +1,5 @@
+http://data.kcmo.org/data.json
+http://data.edmonton.ca/data.json
+http://data.lacounty.gov/data.json
+http://data.maryland.gov/data.json
+http://data.kingcounty.gov/data.json
