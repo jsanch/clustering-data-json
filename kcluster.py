@@ -26,12 +26,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
 from sklearn.manifold import MDS
 
-
-# Viz
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import mpld3
-
 #dl
 import requests
 import os
