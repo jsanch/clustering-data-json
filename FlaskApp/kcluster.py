@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # General
 from __future__ import print_function
 from argparse import ArgumentParser
@@ -39,12 +38,24 @@ import os
 import shutil
 import urllib2
 
+
 def web_server_call(url,k=10,f=1):
 
     frame = run(url,k,f,True)
+    create_html_cluster_tables(frame)
+    print(frame)
     res = frame.to_json(orient='records')
+
     return res
 
+
+def create_html_cluster_tables(df):
+    groups = df.groupby('cluster')
+    for name, group in groups:
+        tabletitle = group['keywords'].iloc[0]
+        g = group[['title']].rename(columns={'title':tabletitle})
+        filename = 'htmltables/'+ str(name) + '.html'
+        g.to_html(filename, index=False, col_space=300)
 
 
 
@@ -97,6 +108,7 @@ def main():
         num_fits = 20
 
     frame = run(args.filename,num_clusters,num_fits,False,args)
+    # print_kframe(frame)
 
     if args.csv:
         frame.to_csv(args.csv_name, index=False,  encoding='utf-8')
@@ -134,10 +146,13 @@ def run(data_resource_path,num_clusters,num_fits, using_url=False, args=''):
     if args != '':
         if args.viz:
             make_a_d3_plot(dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters,args.viz_name)
-    if args.keywords:
-        print(k_keywords)
 
-    return k_clusters_dataframe
+        if args.keywords:
+            print(k_keywords)
+
+    df = add_viz_coords_to_frame(k_clusters_dataframe, dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters)
+
+    return df
 
 
 
@@ -157,8 +172,11 @@ def print_kframe(k_clusters_dataframe):
 ###############################################################################
 def json_to_lists(data_json):
 
+    try:
+        datasets = data_json['dataset']
+    except:
+        datasets = data_json
 
-    datasets = data_json['dataset']
 
     titles = []
     descriptions =[]
@@ -295,6 +313,33 @@ def generate_colors(n):
 
 
 
+def add_viz_coords_to_frame(k_clusters_dataframe, dist,vocab_frame,order_centroids,terms,_clusters,dataLists,num_clusters=10):
+    MDS()
+    # convert two components as we're plotting points in a two-dimensional plane
+    # "precomputed" because we provide a distance matrix
+    # we will also specify `random_state` so the plot is reproducible.
+    mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
+
+    pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
+
+    xs, ys = pos[:, 0], pos[:, 1]
+    print(len(xs))
+    color_list = generate_colors(num_clusters)
+    cluster_colors = {}
+    for i in range(0,num_clusters):
+        cluster_colors[i] = color_list[i]
+
+    keywords = k_clusters_dataframe['keywords'].to_dict()
+    nk = {}
+    for k in keywords:
+        nk[k] = keywords[k]
+
+    df = pd.DataFrame(dict(x=xs, y=ys, cluster=_clusters, title=dataLists['titles']))
+    df['keywords'] = df['cluster']
+    df['keywords'].replace(nk,inplace=True)
+    return df
+
+
 def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num_clusters=10,viz_name='index.html'):
     MDS()
 
@@ -306,7 +351,7 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
     pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
 
     xs, ys = pos[:, 0], pos[:, 1]
-
+    print(len(xs))
     color_list = generate_colors(num_clusters)
     cluster_colors = {}
     for i in range(0,num_clusters):
@@ -320,6 +365,7 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
                 cluster_names[i] = vocab_frame.ix[terms[ind].split(' ')].values.tolist()[0][0].encode('utf-8', 'ignore') +','
             else:
                 cluster_names[i] = cluster_names[i] + vocab_frame.ix[terms[ind].split(' ')].values.tolist()[0][0].encode('utf-8', 'ignore') +','
+    # print(cluster_names)
 
     ###############################################################################
     # mpldd3 plot
@@ -358,6 +404,8 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
 
     #create data frame that has the result of the MDS plus the cluster numbers and titles
     df = pd.DataFrame(dict(x=xs, y=ys, label=clusters, title=dataLists['titles']))
+
+    df.to_csv("scatterplottest.csv", encoding='utf-8', index=False)
     #group by cluster
     groups = df.groupby('label')
 
@@ -409,29 +457,28 @@ def make_a_d3_plot(dist,vocab_frame,order_centroids,terms,clusters,dataLists,num
 
     with open(viz_name, "w") as text_file:
         text_file.write(html)
-
     #######
-    ### plt
+    ### hierarchy
     ########
 
-    from scipy.cluster.hierarchy import ward, dendrogram
+    # from scipy.cluster.hierarchy import ward, dendrogram
 
-    linkage_matrix = ward(dist) #define the linkage_matrix using ward clustering pre-computed distances
+    # linkage_matrix = ward(dist) #define the linkage_matrix using ward clustering pre-computed distances
 
-    fig, ax = plt.subplots(figsize=(15, 60)) # set size
-    ax = dendrogram(linkage_matrix, orientation="right", labels=dataLists['titles']);
+    # fig, ax = plt.subplots(figsize=(15, 60)) # set size
+    # ax = dendrogram(linkage_matrix, orientation="right", labels=dataLists['titles']);
 
-    plt.tick_params(\
-        axis= 'x',          # changes apply to the x-axis
-        which='both',      # both major and minor ticks are affected
-        bottom='off',      # ticks along the bottom edge are off
-        top='off',         # ticks along the top edge are off
-        labelbottom='off')
+    # plt.tick_params(\
+    #     axis= 'x',          # changes apply to the x-axis
+    #     which='both',      # both major and minor ticks are affected
+    #     bottom='off',      # ticks along the bottom edge are off
+    #     top='off',         # ticks along the top edge are off
+    #     labelbottom='off')
 
-    # plt.tight_layout() #show plot with tight layout
+    # # plt.tight_layout() #show plot with tight layout
 
-    #uncomment below to save figure
-    plt.savefig('ward_clusters.png', dpi=200)
+    # #uncomment below to save figure
+    # plt.savefig('ward_clusters.png', dpi=200)
 
 
 

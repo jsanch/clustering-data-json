@@ -1,0 +1,47 @@
+html {
+    font-family: Lato;
+}
+body{
+            font-family: Lato;
+
+}
+.viz-container {
+/*padding: 100px;*/
+width: 80%;
+padding-left: 10%;
+}
+#tables {
+padding-left: 10%;
+/*margin-right: 10%;*/
+}
+.svg-container {
+    width: 100%;
+    margin-right: 0;
+}
+
+.table-wrapper {
+    font-family: Lato;
+    padding: 0;
+    margin: 15px;
+}
+.cluster-table {
+     font-family: Lato;
+     height:150px;
+     width: 100%;
+     overflow-y:auto;
+      /*margin: 25px;*/
+     padding: 0;
+    /*background:tomato;border:1px solid olive;float:left;*/
+    border-bottom:1px solid black;
+}
+.tableheader{
+    font-family: Lato;
+    font-size: 18px;
+    font-weight: bold;
+    border:1px solid black;
+    padding-left: 5px;
+}
+table {
+    border-top:2px solid black;
+    width: 100%;
+}
