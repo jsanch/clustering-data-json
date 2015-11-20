@@ -154,12 +154,12 @@ def run(data_resource_path,num_clusters,num_fits, using_url=False, args=''):
     k_keywords = kresults['keywords']
 
     # print_kframe(k_clusters_dataframe)
-    if args != '':
-        if args.viz:
-            make_a_d3_plot(dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters,args.viz_name)
+    # if args != '':
+    #     if args.viz:
+    #         make_a_d3_plot(dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters,args.viz_name)
 
-        if args.keywords:
-            print(k_keywords)
+    #     if args.keywords:
+    #         print(k_keywords)
 
     df = add_viz_coords_to_frame(k_clusters_dataframe, dist,vocab_frame,order_centroids,terms,k_clusters,dataLists,num_clusters)
 
