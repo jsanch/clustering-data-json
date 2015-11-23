@@ -12,10 +12,6 @@ $ pip install -r requirements.txt
 ## Usage
 
 
-
-```bash
-$ python -m "SimpleHTTPServer"
-```
 ## Credit
 This script is highly based on this post: http://brandonrose.org/clustering
 
